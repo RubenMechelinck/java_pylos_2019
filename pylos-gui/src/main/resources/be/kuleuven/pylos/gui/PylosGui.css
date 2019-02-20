@@ -1,0 +1,77 @@
+.root {
+    -fx-font-size: 10pt;
+    /*-fx-focus-color: red;*/
+}
+
+.table-view > .column-header-background > .nested-column-header > .column-header.table-column > .label {
+    /*-fx-font-weight: bold;*/
+    -fx-font-weight: normal;
+    -fx-font-size: 10pt;
+}
+
+.titled-pane > .title {
+    -fx-font-size: 10pt;
+    -fx-padding: 5 11 5 11;
+    /*-fx-font-weight: bold;*/
+}
+
+.text-field {
+    -fx-focus-traversable: false;
+    -fx-max-height: 25;
+    -fx-min-height: 25;
+    -fx-padding: -1 5 0 5;
+}
+
+.sub-title-vbox {
+    -fx-padding: 15 0 5 0;
+    -fx-font-style: italic;
+    -fx-spacing: 2;
+    -fx-alignment: bottom-left;
+}
+
+.sub-title-hbox {
+    -fx-alignment: bottom-left;
+}
+
+.apply-button {
+    -fx-pref-height: 22;
+    -fx-min-height: 22;
+    -fx-padding: -3 10 0 10;
+    -fx-font-style: normal;
+    -fx-font-size: 9pt;
+}
+
+/*.button {*/
+    /*-fx-pref-height: 22;*/
+    /*-fx-min-height: 22;*/
+    /*-fx-padding: 0 10 0 10;*/
+    /*-fx-font-style: normal;*/
+    /*-fx-font-size: 9pt;*/
+/*}*/
+
+/*.combo-box {*/
+    /*-fx-max-height: 25;*/
+    /*-fx-min-height: 25;*/
+/*}*/
+
+.pane-main {
+    -fx-padding: 5 5 5 5;
+    -fx-spacing: 5;
+    -fx-background-color: lightgray;
+}
+
+.pane-side-bar {
+    -fx-spacing: 5
+}
+
+.padding0 {
+    -fx-padding: 0 0 0 0;
+}
+
+.pane-title-padding5 {
+    -fx-padding: 5 5 5 5;
+}
+
+.pane-title-padding10 {
+    -fx-padding: 10 10 10 10;
+}
