@@ -22,11 +22,11 @@ public class StudentPlayerRandomFit extends PylosPlayer{
         pylosSphere = board.getReserve(this);
         PylosLocation pylosLocation = null;
 
-        Random random = new Random(board.SIZE-1);
+        Random random = new Random(1);
         PylosLocation[] locations = board.getLocations();
 
         while(true) {
-            PylosLocation p = locations[random.nextInt()];
+            PylosLocation p = locations[random.nextInt(board.SIZE-1)];
             if (p.isUsable()){
                 pylosLocation = p;
                 break;
