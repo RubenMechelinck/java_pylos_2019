@@ -14,9 +14,26 @@ import java.util.Random;
  */
 public class StudentPlayerRandomFit extends PylosPlayer{
 
+    private PylosSphere pylosSphere;
+
     @Override
     public void doMove(PylosGameIF game, PylosBoard board) {
 		/* add a reserve sphere to a feasible random location */
+        pylosSphere = board.getReserve(this);
+        PylosLocation pylosLocation = null;
+
+        Random random = new Random(board.SIZE-1);
+        PylosLocation[] locations = board.getLocations();
+
+        while(true) {
+            PylosLocation p = locations[random.nextInt()];
+            if (p.isUsable()){
+                pylosLocation = p;
+                break;
+            }
+        }
+
+        game.moveSphere(pylosSphere, pylosLocation);
 
     }
 
@@ -24,10 +41,14 @@ public class StudentPlayerRandomFit extends PylosPlayer{
     public void doRemove(PylosGameIF game, PylosBoard board) {
 		/* removeSphere a random sphere */
 
+        board.remove(pylosSphere);
+
+
     }
 
     @Override
     public void doRemoveOrPass(PylosGameIF game, PylosBoard board) {
+        game.pass();
 		/* always pass */
 
     }

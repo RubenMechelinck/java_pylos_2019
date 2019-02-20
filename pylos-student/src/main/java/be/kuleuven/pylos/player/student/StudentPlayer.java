@@ -20,6 +20,8 @@ public class StudentPlayer extends PylosPlayer {
 
 		/* game methods
 			* game.moveSphere(myReserveSphere, allLocations[0]); */
+
+		//getMaxInSquare
 	}
 
 	@Override
