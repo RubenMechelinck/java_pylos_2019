@@ -15,8 +15,23 @@ move ORDER
 
 7)2 connecteren
 
-
-
 --Als constructie maakt, naar centrum
+
+
+
+Remove Rules:
+
+
+       eerste bal: removen van gemaakte square
+
+        tweede bal wegnemen van niet square tegel:
+        1) Indien er meer dan 2 vrije ballen liggen
+
+        2de bal wegnemen van square tegel:
+        2)Indien tegenstander geen driehoek heeft
+
+
+
+
 
 
