@@ -2,7 +2,7 @@ move ORDER
 
 1) volledige z maken
 
-2) driehoek blokeren tegenstander
+2) driehoek blokkeren tegenstander
 
 3) vierkant maken
     (-->laatst gelegde verwijderen)
@@ -22,13 +22,13 @@ move ORDER
 Remove Rules:
 
 
-       eerste bal: removen van gemaakte square
+       eerste bal: removen van gemaakte square (als kan dichtst bij rand)
 
         tweede bal niet wegnemen van niet square tegel:
-            indien regel 1,3
+            indien regel 1,3 geld voor tegenstander
 
         anders wel nemen:
-            voorang op regel4
+            als meerdere vrije ballen => kies bal waarop tegenstander kan bouwen
 
 
         2de bal wegnemen van square tegel:

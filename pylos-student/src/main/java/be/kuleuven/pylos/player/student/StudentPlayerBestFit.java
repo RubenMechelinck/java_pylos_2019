@@ -3,11 +3,9 @@ package be.kuleuven.pylos.player.student;
 import be.kuleuven.pylos.game.*;
 import be.kuleuven.pylos.player.PylosPlayer;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import static be.kuleuven.pylos.player.student.Moves.*;
+import static be.kuleuven.pylos.player.student.Removes.removeFirstSphere;
+import static be.kuleuven.pylos.player.student.Removes.removeSecondSphere;
 
 
 /**
@@ -15,13 +13,12 @@ import static be.kuleuven.pylos.player.student.Moves.*;
  */
 public class StudentPlayerBestFit extends PylosPlayer{
 
-    //for testing
-    public static PylosSphere testSphere;
+    //laatst gezette bal
+    public static PylosSphere lastPlacedSphere;
 
     @Override
     public void doMove(PylosGameIF game, PylosBoard board) {
 
-        // for testing ////////////////////////////////////////////////////////////////
         if(blockTriangleOpponent(game, board, this, board.getReserve(this)))
             return;
 
@@ -31,20 +28,23 @@ public class StudentPlayerBestFit extends PylosPlayer{
         if(buildUpWithLowerSphere(game, board, this))
             return;
 
-        if (createTriangle(game, board, this, board.getReserve(this)))
+        if(createTriangle(game, board, this, board.getReserve(this)))
             return;
 
         if(createConnection(game, board, this, board.getReserve(this)))
             return;
 
         randomMove(game, board, this);
-        // end for testing ////////////////////////////////////////////////////////////
     }
 
     @Override
     public void doRemove(PylosGameIF game, PylosBoard board) {
-        //for testing
-        game.removeSphere(testSphere);
+
+        //sws 1 spere terug nemen
+        removeFirstSphere(game, board, this);
+
+        //enventueel 2e bal wegnemen
+        removeSecondSphere(game, board,this);
     }
 
     @Override

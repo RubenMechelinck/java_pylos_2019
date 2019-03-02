@@ -3,11 +3,10 @@ package be.kuleuven.pylos.player.student;
 import be.kuleuven.pylos.game.*;
 import be.kuleuven.pylos.player.PylosPlayer;
 
-import javax.xml.stream.Location;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static be.kuleuven.pylos.player.student.StudentPlayerBestFit.testSphere;
+import static be.kuleuven.pylos.player.student.StudentPlayerBestFit.lastPlacedSphere;
 
 /**
  * Created by ruben on 23/02/19.
@@ -72,10 +71,9 @@ public abstract class Moves {
 
         //verzet of plaats op bord
         game. moveSphere(sphere, toLocation);
+        lastPlacedSphere = sphere;
 
-        //for testing
-        testSphere = sphere;
-
+        System.out.println("blockTriangleOpponent");
         return true;
     }
 
@@ -97,7 +95,7 @@ public abstract class Moves {
         //Zoeken van squares met 3 ballen van eigen kleur
         ArrayList<PylosSquare> allUsefullsquares = new ArrayList<>();
         for (PylosSquare square : board.getAllSquares()) {
-            if(square.getInSquare(player)==3&&square.getInSquare(player.OTHER)==0){
+            if(square.getInSquare(player) == 3 && square.getInSquare(player.OTHER)==0){
                 allUsefullsquares.add(square);
             }
         }
@@ -110,14 +108,25 @@ public abstract class Moves {
 
         else{
             Collections.shuffle(allUsefullsquares);     //Neem een random square
-            PylosSquare pylosSquare = allUsefullsquares.get(0);
-            PylosLocation pylosLocation = getLegeLocation(pylosSquare);
+            int i = 0;
+            PylosSquare pylosSquare = allUsefullsquares.get(i);
+            PylosLocation pylosLocation = null;
+            while(i < allUsefullsquares.size() && (pylosLocation = getLegeLocation(pylosSquare)) == null){
+                pylosSquare = allUsefullsquares.get(i++);
+            }
+
+            if(pylosLocation == null)
+                return false;
+
 
             //TODO NIET ALTIJD VAN RESERVE NEMEN
             PylosSphere pylosSphere = board.getReserve(player);
 
             game.moveSphere(pylosSphere,pylosLocation);
 
+            lastPlacedSphere = pylosSphere;
+
+            System.out.println("buildSquare");
             return true;
         }
 
@@ -187,10 +196,8 @@ public abstract class Moves {
 
         // do move
         game.moveSphere(sphere, toLocation);
-
-        //for testing
-        testSphere = sphere;
-
+        lastPlacedSphere = sphere;
+        System.out.println("buildUpWithLowerSphere");
         return true;
     }
 
@@ -251,7 +258,7 @@ public abstract class Moves {
         int t = Integer.MAX_VALUE;
         PylosLocation toLocation = null;
         for(PylosLocation location: freeLocations){
-            int r = Math.abs(location.X + location.Y - board.SIZE + location.Z);
+            int r = Math.abs(location.X + location.Y - board.SIZE + location.Z); //board.size - location.Z is breedte van laag
             if(t > r) {
                 t = r;
                 toLocation = location;
@@ -260,10 +267,9 @@ public abstract class Moves {
 
         //verzet of plaats op bord
         game.moveSphere(sphere, toLocation);
+        lastPlacedSphere = sphere;
 
-        //for testing
-        testSphere = sphere;
-
+        System.out.println("createTriangle");
         return true;
     }
 
@@ -303,10 +309,9 @@ public abstract class Moves {
 
         //verzet of plaats op bord
         game.moveSphere(sphere, toLocation);
+        lastPlacedSphere = sphere;
 
-        //for testing
-        testSphere = sphere;
-
+        System.out.println("createConnection");
         return true;
     }
 
@@ -329,10 +334,9 @@ public abstract class Moves {
 
         //verzet of plaats op bord
         game.moveSphere(randomSphere, randomLocation);
+        lastPlacedSphere = randomSphere;
 
-        //for testing
-        testSphere = randomSphere;
-
+        System.out.println("randomMove");
         return true;
     }
 
@@ -344,7 +348,7 @@ public abstract class Moves {
     //TODO NIET ALTIJD EERSTE LOCATIE TERUGGEVEN
     public static PylosLocation getLegeLocation(PylosSquare pylosSquare){
         for(int i=0; i<4; i++){
-            if(!pylosSquare.getLocations()[i].isUsed()){
+            if(pylosSquare.getLocations()[i].isUsable()){
                 return pylosSquare.getLocations()[i];
             }
         }
