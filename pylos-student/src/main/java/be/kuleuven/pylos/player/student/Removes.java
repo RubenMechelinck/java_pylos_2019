@@ -1,9 +1,11 @@
 package be.kuleuven.pylos.player.student;
 
-import be.kuleuven.pylos.game.*;
+import be.kuleuven.pylos.game.PylosBoard;
+import be.kuleuven.pylos.game.PylosGameIF;
+import be.kuleuven.pylos.game.PylosSphere;
+import be.kuleuven.pylos.game.PylosSquare;
 import be.kuleuven.pylos.player.PylosPlayer;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,9 +53,7 @@ public class Removes {
     public static void removeSecondSphere(PylosGameIF game, PylosBoard board, PylosPlayer player){
         //get alle vrije spheres die geen voordeel voor tegenstander geven
         List<PylosSphere> spheres = Arrays.stream(board.getSpheres(player))
-                .filter(e -> e.canRemove()
-                                && !canOpponentBuildZ(e, board)
-                                && !canOpponentBuildSquire(e, board, player))
+                .filter(e -> e.canRemove() && !canOpponentBuildSquire(e, board, player))
                 .collect(Collectors.toList());
 
 
@@ -66,10 +66,5 @@ public class Removes {
 
     private static boolean canOpponentBuildSquire(PylosSphere sphere, PylosBoard board, PylosPlayer player){
         return sphere.getLocation().getMaxInSquare(player.OTHER) == 3;
-    }
-
-    private static boolean canOpponentBuildZ(PylosSphere sphere, PylosBoard board){
-
-        return false;
     }
 }

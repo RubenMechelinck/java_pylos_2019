@@ -19,7 +19,7 @@ public class StudentPlayerBestFit extends PylosPlayer{
     @Override
     public void doMove(PylosGameIF game, PylosBoard board) {
 
-        if(buildFullZ(game,board,this,board.getReserve(this)))
+        if(buildFullZ(game,board,this, board.getReserve(this)))
             return;
 
         if(blockTriangleOpponent(game, board, this, board.getReserve(this)))
@@ -45,18 +45,14 @@ public class StudentPlayerBestFit extends PylosPlayer{
 
     @Override
     public void doRemove(PylosGameIF game, PylosBoard board) {
-
         //sws 1 spere terug nemen
         removeFirstSphere(game, board, this);
-
-        //enventueel 2e bal wegnemen
-        removeSecondSphere(game, board,this);
     }
 
     @Override
     public void doRemoveOrPass(PylosGameIF game, PylosBoard board) {
-        //for testing
-        game.pass();
+        //eventueel 2e bal wegnemen
+        removeSecondSphere(game, board,this);
     }
 
 }

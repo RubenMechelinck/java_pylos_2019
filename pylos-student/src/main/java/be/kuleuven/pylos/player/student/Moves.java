@@ -27,60 +27,52 @@ public abstract class Moves {
         //2 situaties
         //TODO SITUATIE 1
 
-
-        //zoek driehoeken, return false als geen zijn
+        //zoek driehoeken
         List<PylosSquare>  triangles = Arrays.stream(squares)
                 .filter(e -> e.getInSquare(player)==3 && e.getInSquare() == 3)
                 .collect(Collectors.toList());
-
-
 
         for(PylosSquare square :triangles){
             int xpos = getLegeSpotposTriangle(square);  //xpos is pos van lege plaats
 
             int [] richting = bepaalrichting(xpos); //Bepaalt richting van andere bal
             PylosLocation pylosLocation = square.getLocations()[xpos];        //Geeft locatie van lege plaats
-            boolean[] exist = realLocation(richting,pylosLocation,board);       //Kijkt of bal bestaat
 
-            //TODO IN METHODE STEKEN
-            if(exist[0]){
-                int pos2 = Integer.signum(richting[1]);
-                System.out.println("xpos: " + xpos);
-                System.out.println("geval1");
-                PylosLocation locationbal = board.getBoardLocation(pylosLocation.X+richting[0],pylosLocation.Y,pylosLocation.Z);
-                PylosLocation locationbal2 = board.getBoardLocation(pylosLocation.X+richting[0],pylosLocation.Y + pos2 ,pylosLocation.Z);
-                if(locationbal.isUsable()&&locationbal2.isUsable()){
-                    game.moveSphere(sphere,locationbal);
-                    lastPlacedSphere = sphere;
-                    return true;
-                }
+            PylosLocation locationbal;
+            if((locationbal = checkPlaceExists(board, richting, pylosLocation)) != null){
+                game.moveSphere(sphere, locationbal);
+                lastPlacedSphere = sphere;
+                return true;
             }
-
-            if(exist[1]){
-                int pos2 = Integer.signum(richting[0]);
-                System.out.println("xpos: " + xpos);
-                PylosLocation locationbal = board.getBoardLocation(pylosLocation.X,pylosLocation.Y+richting[1],pylosLocation.Z);
-                PylosLocation locationbal2 = board.getBoardLocation(pylosLocation.X+ pos2,pylosLocation.Y + richting[1],pylosLocation.Z);
-                if(locationbal.isUsable() && locationbal2.isUsable()){
-                    game.moveSphere(sphere,locationbal);
-                    lastPlacedSphere = sphere;
-                    return true;
-                }
-            }
-
-
-
-
         }
 
         //TODO SITUATIE 2
 
-
         return false;
     }
 
+    private static PylosLocation checkPlaceExists(PylosBoard board, int[] richting, PylosLocation pylosLocation){
+        boolean[] exist = realLocation(richting,pylosLocation,board);       //Kijkt of bal bestaat
 
+        if(exist[0]){
+            int pos2 = Integer.signum(richting[1]);
+            PylosLocation locationbal = board.getBoardLocation(pylosLocation.X+richting[0],pylosLocation.Y,pylosLocation.Z);
+            PylosLocation locationbal2 = board.getBoardLocation(pylosLocation.X+richting[0],pylosLocation.Y + pos2 ,pylosLocation.Z);
+            if(locationbal.isUsable()&&locationbal2.isUsable()){
+                return locationbal;
+            }
+        }
 
+        if(exist[1]){
+            int pos2 = Integer.signum(richting[0]);
+            PylosLocation locationbal = board.getBoardLocation(pylosLocation.X,pylosLocation.Y+richting[1],pylosLocation.Z);
+            PylosLocation locationbal2 = board.getBoardLocation(pylosLocation.X+ pos2,pylosLocation.Y + richting[1],pylosLocation.Z);
+            if(locationbal.isUsable() && locationbal2.isUsable()){
+                return locationbal;
+            }
+        }
+        return null;
+    }
 
     /**
      * Blokeer een driehoek van de tegenstander door een eigen bal op de legen plek te leggen.
@@ -106,6 +98,16 @@ public abstract class Moves {
         if (freeTrianglesLocations.isEmpty())
             return false;
 
+        PylosLocation toLocation = getDichstBijCentrum(board, freeTrianglesLocations);
+
+        //verzet of plaats op bord
+        game. moveSphere(sphere, toLocation);
+        lastPlacedSphere = sphere;
+        System.out.println("blockTriangleOpponent");
+        return true;
+    }
+
+    private static PylosLocation getDichstBijCentrum(PylosBoard board, List<PylosLocation> freeTrianglesLocations){
         //zoek plaats dichtst bij centrum (eerste gevonden dichtste plaats)
         int t = Integer.MAX_VALUE;
         PylosLocation toLocation = null;
@@ -117,69 +119,36 @@ public abstract class Moves {
             }
         }
 
-        //verzet of plaats op bord
-        game. moveSphere(sphere, toLocation);
-        lastPlacedSphere = sphere;
-
-        System.out.println("blockTriangleOpponent");
-        return true;
+        return toLocation;
     }
 
     /**
-     * Maak een vierkant van een square met 3 ballen van jouw kleur
+     * Zoek driehoek waarvan een viekant kan maken.
      * @param game
      * @param board
-     * @param player De huidige speler aan de beurt
+     * @param player De huidige speler aan de beurt.
      * @return
      */
     public static boolean buildSquare(PylosGameIF game, PylosBoard board, PylosPlayer player){
-        ArrayList<PylosLocation> allUsableLocations = new ArrayList<>();
-        for (PylosLocation bl : board.getLocations()) {
-            if (bl.isUsable()) {
-                allUsableLocations.add(bl);
-            }
-        }
+        List<PylosSquare> squares = Arrays.stream(board.getAllSquares())
+                .filter(e -> e.getInSquare(player) == 3 && e.getInSquare(player.OTHER) == 0)
+                .collect(Collectors.toList());
 
-        //Zoeken van squares met 3 ballen van eigen kleur
-        ArrayList<PylosSquare> allUsefullsquares = new ArrayList<>();
-        for (PylosSquare square : board.getAllSquares()) {
-            if(square.getInSquare(player) == 3 && square.getInSquare(player.OTHER)==0){
-                allUsefullsquares.add(square);
-            }
-        }
-
-        //GEEN MOGELIJKHEID TOT MAKEN VAN VIERKANT
-        if(allUsefullsquares.size()==0){
+        if(squares.isEmpty())
             return false;
-        }
 
+        PylosLocation location = null;
+        while (location == null && !squares.isEmpty())
+            location = getLegeLocation(squares.remove(0));
 
-        else{
-            Collections.shuffle(allUsefullsquares);     //Neem een random square
-            int i = 0;
-            PylosSquare pylosSquare = allUsefullsquares.get(i);
-            PylosLocation pylosLocation = null;
-            while(i < allUsefullsquares.size() && (pylosLocation = getLegeLocation(pylosSquare)) == null){
-                pylosSquare = allUsefullsquares.get(i++);
-            }
-
-            if(pylosLocation == null)
-                return false;
-
-
-            //TODO NIET ALTIJD VAN RESERVE NEMEN
+        if(location != null) {
             PylosSphere pylosSphere = board.getReserve(player);
-
-            game.moveSphere(pylosSphere,pylosLocation);
-
+            game.moveSphere(pylosSphere, location);
             lastPlacedSphere = pylosSphere;
-
             System.out.println("buildSquare");
             return true;
         }
-
-
-
+        return false;
     }
 
 
@@ -259,40 +228,17 @@ public abstract class Moves {
             int xpos = findXPos(player, square); //Bepaalt pos van X
             int [] richting = bepaalrichting(xpos); //Bepaalt richting van andere bal
             PylosLocation pylosLocation = getHalfZSquarePos(player,square);         //Geeft locatie van X
-            boolean[] exist = realLocation(richting,pylosLocation,board);       //Kijkt of bal bestaat
 
-            if(exist[0]){
-                int pos2 = Integer.signum(richting[1]);
-                PylosLocation locationbal = board.getBoardLocation(pylosLocation.X+richting[0],pylosLocation.Y,pylosLocation.Z);
-                PylosLocation locationbal2 = board.getBoardLocation(pylosLocation.X+richting[0],pylosLocation.Y + pos2 ,pylosLocation.Z);
-                if(locationbal.isUsable() && locationbal2.isUsable()){
-                    game.moveSphere(sphere,locationbal);
-                    lastPlacedSphere = sphere;
-                    return true;
-                }
+            PylosLocation locationbal;
+            if((locationbal = checkPlaceExists(board, richting, pylosLocation)) != null){
+                game.moveSphere(sphere, locationbal);
+                lastPlacedSphere = sphere;
+                return true;
             }
-
-
-
-            if(exist[1]){
-                int pos2 = Integer.signum(richting[0]);
-                PylosLocation locationbal = board.getBoardLocation(pylosLocation.X,pylosLocation.Y+richting[1],pylosLocation.Z);
-                PylosLocation locationbal2 = board.getBoardLocation(pylosLocation.X+ pos2,pylosLocation.Y + +richting[1],pylosLocation.Z);
-                if(locationbal.isUsable() && locationbal2.isUsable()){
-                    game.moveSphere(sphere,locationbal);
-                    lastPlacedSphere = sphere;
-                    return true;
-                }
-            }
-
-
         }
 
         return false;
     }
-
-
-
 
     /**
      * Zoekt vierkant met 2 eigen ballen en 2 lege plaatsen, zet par:sphere op plek dichtst bij centrum
@@ -308,32 +254,27 @@ public abstract class Moves {
                 .collect(Collectors.toList());
 
         //lege plaatsen in halve squares
-        List<PylosLocation> freeLocations = new ArrayList<>();
-        squares.forEach(e -> Arrays.stream(e.getLocations())
-                .forEach(q -> {if(q.isUsable()){freeLocations.add(q);}}));
+        List<PylosLocation> freeLocations = getLegePlaatsenInSquare(squares);
 
         if(freeLocations.isEmpty())
             return false;
 
         //zoek plaats dichtst bij centrum (eerste gevonden dichtste plaats)
-        int t = Integer.MAX_VALUE;
-        PylosLocation toLocation = null;
-        for(PylosLocation location: freeLocations){
-            int r = Math.abs(location.X + location.Y - board.SIZE + location.Z); //board.size - location.Z is breedte van laag
-            if(t > r) {
-                t = r;
-                toLocation = location;
-            }
-        }
+        PylosLocation toLocation = getDichstBijCentrum(board, freeLocations);
 
         //verzet of plaats op bord
         game.moveSphere(sphere, toLocation);
         lastPlacedSphere = sphere;
-
         System.out.println("createTriangle");
         return true;
     }
 
+    private static List<PylosLocation> getLegePlaatsenInSquare(List<PylosSquare> squares){
+        List<PylosLocation> freeLocations = new ArrayList<>();
+        squares.forEach(e -> Arrays.stream(e.getLocations())
+                .forEach(q -> {if(q.isUsable()){freeLocations.add(q);}}));
+        return freeLocations;
+    }
 
     /**
      * Connecteer 2 ballen aan elkaar, deze zoekt ballen waarbij er slechts 1 bal aanwezig is van de speler
@@ -349,42 +290,32 @@ public abstract class Moves {
                 .collect(Collectors.toList());
 
         //lege plaatsen in halve squares
-        List<PylosLocation> freeLocations = new ArrayList<>();
-        squares.forEach(e -> Arrays.stream(e.getLocations())
-                .forEach(q -> {if(q.isUsable()){freeLocations.add(q);}}));
+        List<PylosLocation> freeLocations = getLegePlaatsenInSquare(squares);
 
         List<PylosLocation> bezetteLocations = new ArrayList<>();
         squares.forEach(e -> Arrays.stream(e.getLocations())
                 .forEach(q -> {if(!q.isUsable()){bezetteLocations.add(q);}}));
 
-
         if(freeLocations.isEmpty())
             return false;
 
         //zoek plaats dichtst bij centrum (eerste gevonden dichtste plaats)
-        int t = Integer.MAX_VALUE;
         PylosLocation toLocation = null;
         PylosLocation pylosLocationbal = bezetteLocations.get(0);
         for(PylosLocation location: freeLocations){
             if(pylosLocationbal!=null) {
                 if ((pylosLocationbal.X + location.X + pylosLocationbal.Y + location.Y) % 2 == 1) {
-
-                    int r = Math.abs(location.X + location.Y - board.SIZE + location.Z);
-                    if (t > r) {
-                        t = r;
-                        toLocation = location;
-                    }
+                    toLocation = getDichstBijCentrum(board, freeLocations);
                 }
             }
         }
 
         //verzet of plaats op bord
-        if(toLocation!=null){
+        if(toLocation != null){
             game.moveSphere(sphere, toLocation);
             lastPlacedSphere = sphere;
             return true;
         }
-
 
         return false;
     }
@@ -396,7 +327,7 @@ public abstract class Moves {
      * @return
      */
     public static boolean randomMove(PylosGameIF game, PylosBoard board, PylosPlayer player){
-        Random random = new Random(0);
+        Random random = new Random();
 
         //get random vrije locatie op bord
         List<PylosLocation> usableLocations = Arrays.stream(board.getLocations()).filter(e -> e.isUsable()).collect(Collectors.toList());
@@ -414,18 +345,12 @@ public abstract class Moves {
         return true;
     }
 
-
-
-
-
-
-    //TODO NIET ALTIJD EERSTE LOCATIE TERUGGEVEN
-    public static PylosLocation getLegeLocation(PylosSquare pylosSquare){
-        for(int i=0; i<4; i++){
-            if(!pylosSquare.getLocations()[i].isUsed()){
+    //get eerste lege location
+    private static PylosLocation getLegeLocation(PylosSquare pylosSquare){
+        for(int i=0; i<4; i++)
+            if(pylosSquare.getLocations()[i].isUsable())
                 return pylosSquare.getLocations()[i];
-            }
-        }
+
         return null;
     }
 
@@ -450,32 +375,18 @@ public abstract class Moves {
         }
 
         else{
-            if (square.getLocations()[2].isUsed() && square.getLocations()[0].getSphere().PLAYER_COLOR.equals(square.getLocations()[2].getSphere().PLAYER_COLOR)){
-                return true;
-            }
-
-            return false;
+            return square.getLocations()[2].isUsed() && square.getLocations()[0].getSphere().PLAYER_COLOR.equals(square.getLocations()[2].getSphere().PLAYER_COLOR);
         }
         return false;
     }
-
-
-
-
-
-
-
-
 
     //Geeft Location van de X
     public static PylosLocation getHalfZSquarePos(PylosPlayer player, PylosSquare square){
         for(PylosLocation location :square.getLocations()){
             if(location.isUsed() && location.getSphere().PLAYER_COLOR.equals(player.OTHER.PLAYER_COLOR)){
-
                 return location;
             }
         }
-
         return null;
     }
 
@@ -489,8 +400,6 @@ public abstract class Moves {
         }
         return -1;
     }
-
-
 
     //TODO DOCUMENTEREN
     private static int[] bepaalrichting(int posX) {
@@ -515,20 +424,15 @@ public abstract class Moves {
     private static boolean[] realLocation(int [] richting ,PylosLocation pylosLocation, PylosBoard board){
         boolean [] exist = new boolean[2];
         //exist default op false
-
-        System.out.println("x:" + pylosLocation.X );
-        System.out.println("y:" + pylosLocation.Y);
-        System.out.println("richtingx:" + richting[0]);
-        System.out.println("richtingy:" + richting[1]);
         int positionx = pylosLocation.X + richting[0];
         int positiony = pylosLocation.Y + richting[1];
 
         if(pylosLocation.Z == 0){
-            if(positionx>=0&&positionx<4){
+            if(positionx >= 0 && positionx < 4){
                 exist[0] = true;
             }
 
-            if(positiony>=0&&positiony<4){
+            if(positiony >= 0 && positiony < 4){
                 exist[1] = true;
             }
         }
