@@ -23,14 +23,60 @@ public abstract class Moves {
     public static boolean buildFullZ(PylosGameIF game, PylosBoard board, PylosPlayer player, PylosSphere sphere){
         PylosSquare[] squares = board.getAllSquares(); //14 mogelijke squares in 4x4 bord
 
+
+        //2 situaties
+        //TODO SITUATIE 1
+
+
         //zoek driehoeken, return false als geen zijn
         List<PylosSquare>  triangles = Arrays.stream(squares)
                 .filter(e -> e.getInSquare(player)==3 && e.getInSquare() == 3)
                 .collect(Collectors.toList());
 
 
-        return true;
+
+        for(PylosSquare square :triangles){
+            int xpos = getLegeSpotposTriangle(square);  //xpos is pos van lege plaats
+
+            int [] richting = bepaalrichting(xpos); //Bepaalt richting van andere bal
+            PylosLocation pylosLocation = square.getLocations()[xpos];        //Geeft locatie van lege plaats
+            boolean[] exist = realLocation(richting,pylosLocation,board);       //Kijkt of bal bestaat
+
+            //TODO IN METHODE STEKEN
+            if(exist[0]){
+                int pos2 = Integer.signum(richting[1]);
+                System.out.println("xpos: " + xpos);
+                System.out.println("geval1");
+                PylosLocation locationbal = board.getBoardLocation(pylosLocation.X+richting[0],pylosLocation.Y,pylosLocation.Z);
+                PylosLocation locationbal2 = board.getBoardLocation(pylosLocation.X+richting[0],pylosLocation.Y + pos2 ,pylosLocation.Z);
+                if(locationbal.isUsable()&&locationbal2.isUsable()){
+                    game.moveSphere(sphere,locationbal);
+                    return true;
+                }
+            }
+
+            if(exist[1]){
+                int pos2 = Integer.signum(richting[0]);
+                System.out.println("xpos: " + xpos);
+                PylosLocation locationbal = board.getBoardLocation(pylosLocation.X,pylosLocation.Y+richting[1],pylosLocation.Z);
+                PylosLocation locationbal2 = board.getBoardLocation(pylosLocation.X+ pos2,pylosLocation.Y + richting[1],pylosLocation.Z);
+                if(locationbal.isUsable() && locationbal2.isUsable()){
+                    game.moveSphere(sphere,locationbal);
+                    return true;
+                }
+            }
+
+
+
+
+        }
+
+        //TODO SITUATIE 2
+
+
+        return false;
     }
+
 
 
 
@@ -201,37 +247,48 @@ public abstract class Moves {
         return true;
     }
 
-    public static boolean buildHalfZ(PylosGameIF game, PylosBoard board, PylosPlayer player,  PylosSphere sphere){
-        //zoek squares met 2 eigen ballen en 1 tegenstander bal
+    public static boolean buildHalfZ(PylosGameIF game, PylosBoard board, PylosPlayer player,  PylosSphere sphere) {
+        //zoek squares met 3 eigen ballen en 1 tegenstander bal
         List<PylosSquare> squares = Arrays.stream(board.getAllSquares())
-                .filter(e -> e.getInSquare(player) == 2 && e.getInSquare() == 3)
+                .filter(e -> e.getInSquare(player) == 3 && e.getInSquare() == 4)
                 .collect(Collectors.toList());
 
+        for (PylosSquare square : squares) {
+            int xpos = findXPos(player, square); //Bepaalt pos van X
+            int [] richting = bepaalrichting(xpos); //Bepaalt richting van andere bal
+            PylosLocation pylosLocation = getHalfZSquarePos(player,square);         //Geeft locatie van X
+            boolean[] exist = realLocation(richting,pylosLocation,board);       //Kijkt of bal bestaat
 
-        //Kijken of eigen ballen schuin tov elkaar staan
-        for(PylosSquare square :squares){
-            if(isHalfZSquare(player,square)){
-                PylosLocation pylosLocation = getHalfZSquarePos(player,square);
-
+            if(exist[0]){
+                int pos2 = Integer.signum(richting[1]);
+                PylosLocation locationbal = board.getBoardLocation(pylosLocation.X+richting[0],pylosLocation.Y,pylosLocation.Z);
+                PylosLocation locationbal2 = board.getBoardLocation(pylosLocation.X+richting[0],pylosLocation.Y + pos2 ,pylosLocation.Z);
+                if(locationbal.isUsable() && locationbal2.isUsable()){
+                    game.moveSphere(sphere,locationbal);
+                    return true;
+                }
             }
+
+
+
+            if(exist[1]){
+                int pos2 = Integer.signum(richting[0]);
+                PylosLocation locationbal = board.getBoardLocation(pylosLocation.X,pylosLocation.Y+richting[1],pylosLocation.Z);
+                PylosLocation locationbal2 = board.getBoardLocation(pylosLocation.X+ pos2,pylosLocation.Y + +richting[1],pylosLocation.Z);
+                if(locationbal.isUsable() && locationbal2.isUsable()){
+                    game.moveSphere(sphere,locationbal);
+                    return true;
+                }
+            }
+
+
         }
 
-
-
-/*
-        //zoek alle vrije plaatsen in driehoeken
-        List<PylosLocation> freeLocations = new ArrayList<>();
-        squares.forEach(e -> Arrays.stream(e.isSquare())
-                .filter(PylosLocation::isUsable)
-                .forEach(freeLocations::add));
-
-        freeLocations.get(0).
-*/
-
-
-        return true;
-
+        return false;
     }
+
+
+
 
     /**
      * Zoekt vierkant met 2 eigen ballen en 2 lege plaatsen, zet par:sphere op plek dichtst bij centrum
@@ -292,6 +349,10 @@ public abstract class Moves {
         squares.forEach(e -> Arrays.stream(e.getLocations())
                 .forEach(q -> {if(q.isUsable()){freeLocations.add(q);}}));
 
+        List<PylosLocation> bezetteLocations = new ArrayList<>();
+        squares.forEach(e -> Arrays.stream(e.getLocations())
+                .forEach(q -> {if(!q.isUsable()){bezetteLocations.add(q);}}));
+
 
         if(freeLocations.isEmpty())
             return false;
@@ -299,20 +360,29 @@ public abstract class Moves {
         //zoek plaats dichtst bij centrum (eerste gevonden dichtste plaats)
         int t = Integer.MAX_VALUE;
         PylosLocation toLocation = null;
+        PylosLocation pylosLocationbal = bezetteLocations.get(0);
         for(PylosLocation location: freeLocations){
-            int r = Math.abs(location.X + location.Y - board.SIZE + location.Z);
-            if(t > r) {
-                t = r;
-                toLocation = location;
+            if(pylosLocationbal!=null) {
+                if ((pylosLocationbal.X + location.X + pylosLocationbal.Y + location.Y) % 2 == 1) {
+
+                    int r = Math.abs(location.X + location.Y - board.SIZE + location.Z);
+                    if (t > r) {
+                        t = r;
+                        toLocation = location;
+                    }
+                }
             }
         }
 
         //verzet of plaats op bord
-        game.moveSphere(sphere, toLocation);
-        lastPlacedSphere = sphere;
+        if(toLocation!=null){
+            game.moveSphere(sphere, toLocation);
+            lastPlacedSphere = sphere;
+            return true;
+        }
 
-        System.out.println("createConnection");
-        return true;
+        
+        return false;
     }
 
     /**
@@ -348,7 +418,7 @@ public abstract class Moves {
     //TODO NIET ALTIJD EERSTE LOCATIE TERUGGEVEN
     public static PylosLocation getLegeLocation(PylosSquare pylosSquare){
         for(int i=0; i<4; i++){
-            if(pylosSquare.getLocations()[i].isUsable()){
+            if(!pylosSquare.getLocations()[i].isUsed()){
                 return pylosSquare.getLocations()[i];
             }
         }
@@ -367,22 +437,33 @@ public abstract class Moves {
 
      */
     public static boolean isHalfZSquare(PylosPlayer player, PylosSquare square){
-       if(!square.getLocations()[0].isUsed() || square.getLocations()[0].getSphere().PLAYER_COLOR.equals(player.OTHER.PLAYER_COLOR)){
-           if(square.getLocations()[1].getSphere().PLAYER_COLOR.equals(square.getLocations()[2].getSphere().PLAYER_COLOR)){
-             return true;
-           }
-       }
+        if(!square.getLocations()[0].isUsed() || square.getLocations()[0].getSphere().PLAYER_COLOR.equals(player.OTHER.PLAYER_COLOR)) {           //is X of leeg
+            if (square.getLocations()[1].isUsed() && square.getLocations()[2].isUsed()) {                                                    //TODO EFFICIENTER
+                if (square.getLocations()[1].getSphere().PLAYER_COLOR.equals(square.getLocations()[2].getSphere().PLAYER_COLOR)) {
+                    return true;
+                }
+            }
+        }
 
-       else{
-           if (square.getLocations()[2].isUsed() && square.getLocations()[0].getSphere().PLAYER_COLOR.equals(square.getLocations()[2].getSphere().PLAYER_COLOR)){
-               return true;
-           }
+        else{
+            if (square.getLocations()[2].isUsed() && square.getLocations()[0].getSphere().PLAYER_COLOR.equals(square.getLocations()[2].getSphere().PLAYER_COLOR)){
+                return true;
+            }
 
-       return false;
+            return false;
+        }
+        return false;
     }
-    return false;
-    }
 
+
+
+
+
+
+
+
+
+    //Geeft Location van de X
     public static PylosLocation getHalfZSquarePos(PylosPlayer player, PylosSquare square){
         for(PylosLocation location :square.getLocations()){
             if(location.isUsed() && location.getSphere().PLAYER_COLOR.equals(player.OTHER.PLAYER_COLOR)){
@@ -393,5 +474,88 @@ public abstract class Moves {
 
         return null;
     }
+
+    private static int findXPos(PylosPlayer player,PylosSquare pylosSquare){
+        for(int i=0; i<4; i++) {
+            if (pylosSquare.getLocations()[i].isUsed()) {
+                if (pylosSquare.getLocations()[i].getSphere().PLAYER_COLOR.equals(player.OTHER.PLAYER_COLOR)) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+
+
+
+    //TODO DOCUMENTEREN
+    private static int[] bepaalrichting(int posX) {
+        int[] richting = new int[2];
+        richting[0] = 2;       //bit zetten op 0/1
+        richting[1] = 2;
+
+
+        if (posX % 2 != 0) {
+            richting[0] = -richting[0];
+        }
+
+        if (posX % 4 - 1 > 0) {
+            richting[1] = -richting[1];
+        }
+
+        return richting;
+    }
+
+
+
+    private static boolean[] realLocation(int [] richting ,PylosLocation pylosLocation, PylosBoard board){
+        boolean [] exist = new boolean[2];
+        //exist default op false
+
+        System.out.println("x:" + pylosLocation.X );
+        System.out.println("y:" + pylosLocation.Y);
+        System.out.println("richtingx:" + richting[0]);
+        System.out.println("richtingy:" + richting[1]);
+        int positionx = pylosLocation.X + richting[0];
+        int positiony = pylosLocation.Y + richting[1];
+
+        if(pylosLocation.Z == 0){
+            if(positionx>=0&&positionx<4){
+                exist[0] = true;
+            }
+
+            if(positiony>=0&&positiony<4){
+                exist[1] = true;
+            }
+        }
+
+        else if(pylosLocation.Z == 1){
+            if(positionx>=0&&positionx<3){
+                exist[0] = true;
+            }
+
+            if(positiony>=0&&positiony<3){
+                exist[1] = true;
+            }
+        }
+
+        return exist;
+    }
+
+
+
+
+    public static int getLegeSpotposTriangle(PylosSquare square){
+        for(int i=0; i<4; i++) {
+            if (!square.getLocations()[i].isUsed()) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+
+
+
 
 }

@@ -19,6 +19,9 @@ public class StudentPlayerBestFit extends PylosPlayer{
     @Override
     public void doMove(PylosGameIF game, PylosBoard board) {
 
+        if(buildFullZ(game,board,this,board.getReserve(this)))
+            return;
+
         if(blockTriangleOpponent(game, board, this, board.getReserve(this)))
             return;
 
@@ -26,6 +29,9 @@ public class StudentPlayerBestFit extends PylosPlayer{
             return;
 
         if(buildUpWithLowerSphere(game, board, this))
+            return;
+
+        if(buildHalfZ(game,board,this,board.getReserve(this)))
             return;
 
         if(createTriangle(game, board, this, board.getReserve(this)))
