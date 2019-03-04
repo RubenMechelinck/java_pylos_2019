@@ -51,6 +51,7 @@ public abstract class Moves {
                 PylosLocation locationbal2 = board.getBoardLocation(pylosLocation.X+richting[0],pylosLocation.Y + pos2 ,pylosLocation.Z);
                 if(locationbal.isUsable()&&locationbal2.isUsable()){
                     game.moveSphere(sphere,locationbal);
+                    lastPlacedSphere = sphere;
                     return true;
                 }
             }
@@ -62,6 +63,7 @@ public abstract class Moves {
                 PylosLocation locationbal2 = board.getBoardLocation(pylosLocation.X+ pos2,pylosLocation.Y + richting[1],pylosLocation.Z);
                 if(locationbal.isUsable() && locationbal2.isUsable()){
                     game.moveSphere(sphere,locationbal);
+                    lastPlacedSphere = sphere;
                     return true;
                 }
             }
@@ -265,6 +267,7 @@ public abstract class Moves {
                 PylosLocation locationbal2 = board.getBoardLocation(pylosLocation.X+richting[0],pylosLocation.Y + pos2 ,pylosLocation.Z);
                 if(locationbal.isUsable() && locationbal2.isUsable()){
                     game.moveSphere(sphere,locationbal);
+                    lastPlacedSphere = sphere;
                     return true;
                 }
             }
@@ -277,6 +280,7 @@ public abstract class Moves {
                 PylosLocation locationbal2 = board.getBoardLocation(pylosLocation.X+ pos2,pylosLocation.Y + +richting[1],pylosLocation.Z);
                 if(locationbal.isUsable() && locationbal2.isUsable()){
                     game.moveSphere(sphere,locationbal);
+                    lastPlacedSphere = sphere;
                     return true;
                 }
             }
@@ -381,7 +385,7 @@ public abstract class Moves {
             return true;
         }
 
-        
+
         return false;
     }
 
