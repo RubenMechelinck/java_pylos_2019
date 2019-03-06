@@ -31,9 +31,6 @@ public class Removes {
                         .anyMatch(v -> v == lastPlacedSphere.getLocation()))
                 .collect(Collectors.toList());
 
-        if(squares.isEmpty())
-            System.out.println();
-
         //get locatie met eigen sphere die dichts bij rand ligt
         PylosSphere[] sphere = new PylosSphere[1];
         int[] l = {Integer.MIN_VALUE};
@@ -47,7 +44,7 @@ public class Removes {
 
         //haal die sphere weg
         game.removeSphere(sphere[0]);
-        System.out.println("- removeFirstSphere");
+        //System.out.println("- removeFirstSphere");
     }
 
     public static void removeSecondSphere(PylosGameIF game, PylosBoard board, PylosPlayer player){
@@ -59,7 +56,7 @@ public class Removes {
 
         if(!spheres.isEmpty()) {
             game.removeSphere(spheres.get(0));
-            System.out.println("- removeSecondSphere");
+            //System.out.println("- removeSecondSphere");
         } else
             game.pass();
     }

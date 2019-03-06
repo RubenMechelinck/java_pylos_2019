@@ -25,7 +25,7 @@ public abstract class Moves {
 
     public static boolean buildFullZ(PylosGameIF game, PylosBoard board, PylosPlayer player, PylosSphere sphere){
         if(buildFullZ1(game,board,player,sphere)) {
-        return true;
+            return true;
         }
 
         return buildFullZ2(game, board, player, sphere);
@@ -40,7 +40,7 @@ public abstract class Moves {
      * @return
      */
 
-    public static boolean buildFullZ1(PylosGameIF game, PylosBoard board, PylosPlayer player, PylosSphere sphere){
+    private static boolean buildFullZ1(PylosGameIF game, PylosBoard board, PylosPlayer player, PylosSphere sphere){
         PylosSquare[] squares = board.getAllSquares(); //14 mogelijke squares in 4x4 bord
 
         //zoek driehoeken
@@ -76,7 +76,7 @@ public abstract class Moves {
      * @return
      */
 
-    public static boolean buildFullZ2(PylosGameIF game, PylosBoard board, PylosPlayer player, PylosSphere sphere){
+    private static boolean buildFullZ2(PylosGameIF game, PylosBoard board, PylosPlayer player, PylosSphere sphere){
         //zoek squares met 2 eigen ballen en 1 tegenstander bal
         List<PylosSquare> squares = Arrays.stream(board.getAllSquares())
                 .filter(e -> e.getInSquare(player) == 2 && e.getInSquare() == 2)
@@ -85,7 +85,7 @@ public abstract class Moves {
 
         //Kijken of eigen ballen schuin tov elkaar staan
         for(PylosSquare square :squares){
-            if(isFullZSquare(player,square)){
+            if(isFullZSquare(square)){
                 List<Integer> lpos = getLegeBalpos(square); //Bepaalt lege plaatsen positie
                 List<PylosSquare> locations = new ArrayList<>();
                 locations.add(square);
@@ -105,19 +105,16 @@ public abstract class Moves {
                         }
                     }
                 }
-
-
             }
         }
 
         return false;
-
     }
 
 
     //Controlleerd of de plaats bestaat buiten het bord voor Pattern2.
     private static PylosLocation checkPlaceExists(PylosBoard board, int[] richting, PylosLocation pylosLocation){
-        boolean[] exist = realLocation(richting,pylosLocation,board);       //Kijkt of bal bestaat
+        boolean[] exist = realLocation(richting,pylosLocation);       //Kijkt of bal bestaat
 
         if(exist[0]){
             int pos2 = Integer.signum(richting[1]);
@@ -140,9 +137,9 @@ public abstract class Moves {
     }
 
     //controlleert of de plaats bestaat voor Pattern1.
-    public static boolean isCheckPlaceExistsPattern(PylosBoard board, int[] richting, PylosLocation pylosLocation, PylosPlayer player){
+    private static boolean isCheckPlaceExistsPattern(PylosBoard board, int[] richting, PylosLocation pylosLocation, PylosPlayer player){
 
-        boolean[] exist = realLocation(richting,pylosLocation,board);
+        boolean[] exist = realLocation(richting,pylosLocation);
 
         if(exist[0]){
             int pos2 = Integer.signum(richting[1]);
@@ -194,7 +191,7 @@ public abstract class Moves {
         //verzet of plaats op bord
         game. moveSphere(sphere, toLocation);
         lastPlacedSphere = sphere;
-        System.out.println("blockTriangleOpponent");
+        //System.out.println("blockTriangleOpponent");
         return true;
     }
 
@@ -236,7 +233,7 @@ public abstract class Moves {
             PylosSphere pylosSphere = board.getReserve(player);
             game.moveSphere(pylosSphere, location);
             lastPlacedSphere = pylosSphere;
-            System.out.println("buildSquare");
+            //System.out.println("buildSquare");
             return true;
         }
         return false;
@@ -305,7 +302,7 @@ public abstract class Moves {
         // do move
         game.moveSphere(sphere, toLocation);
         lastPlacedSphere = sphere;
-        System.out.println("buildUpWithLowerSphere");
+        //System.out.println("buildUpWithLowerSphere");
         return true;
     }
 
@@ -334,7 +331,7 @@ public abstract class Moves {
      * @param player De speler die de aan de beurt is.
      * @return
      */
-    public static boolean buildHalfZ1(PylosGameIF game, PylosBoard board, PylosPlayer player,  PylosSphere sphere) {
+    private static boolean buildHalfZ1(PylosGameIF game, PylosBoard board, PylosPlayer player,  PylosSphere sphere) {
         //zoek squares met 3 eigen ballen en 1 tegenstander bal
         List<PylosSquare> squares = Arrays.stream(board.getAllSquares())
                 .filter(e -> e.getInSquare(player) == 3 && e.getInSquare() == 4)
@@ -366,7 +363,7 @@ public abstract class Moves {
      * @param player De speler die de aan de beurt is.
      * @return
      */
-    public static boolean buildHalfZ2(PylosGameIF game, PylosBoard board, PylosPlayer player,  PylosSphere sphere){
+    private static boolean buildHalfZ2(PylosGameIF game, PylosBoard board, PylosPlayer player,  PylosSphere sphere){
 
 
         //zoek squares met 2 eigen ballen en 1 tegenstander bal
@@ -426,7 +423,7 @@ public abstract class Moves {
         //verzet of plaats op bord
         game.moveSphere(sphere, toLocation);
         lastPlacedSphere = sphere;
-        System.out.println("createTriangle");
+        //System.out.println("createTriangle");
         return true;
     }
 
@@ -482,7 +479,7 @@ public abstract class Moves {
     }
 
     /**
-     * Zet een random bal (reserver of reeds op bord) naar random locatie
+     * Zet een random bal (reserve of reeds op bord) naar random locatie
      * @param board
      * @param player
      * @return
@@ -502,10 +499,11 @@ public abstract class Moves {
         game.moveSphere(randomSphere, randomLocation);
         lastPlacedSphere = randomSphere;
 
-        System.out.println("randomMove");
+        //System.out.println("randomMove");
         return true;
     }
 
+    //TODO DOCUMENTEREN
     //get eerste lege location
     private static PylosLocation getLegeLocation(PylosSquare pylosSquare){
         for(int i=0; i<4; i++)
@@ -515,23 +513,10 @@ public abstract class Moves {
         return null;
     }
 
-
-    //Kijkt of square van type
-
-    /*
-
-    ************ Wit Black
-    **** ******* Niets Wit
-
-    is
-
-     */
-    public static boolean isHalfZSquare(PylosPlayer player, PylosSquare square){
+    private static boolean isHalfZSquare(PylosPlayer player, PylosSquare square){
         if(!square.getLocations()[0].isUsed() || square.getLocations()[0].getSphere().PLAYER_COLOR.equals(player.OTHER.PLAYER_COLOR)) {           //is X of leeg
             if (square.getLocations()[1].isUsed() && square.getLocations()[2].isUsed()) {
-                if (square.getLocations()[1].getSphere().PLAYER_COLOR.equals(square.getLocations()[2].getSphere().PLAYER_COLOR)) {
-                    return true;
-                }
+                return square.getLocations()[1].getSphere().PLAYER_COLOR.equals(square.getLocations()[2].getSphere().PLAYER_COLOR);
             }
         }
 
@@ -542,7 +527,7 @@ public abstract class Moves {
     }
 
     //Geeft Location van de X
-    public static PylosLocation getHalfZSquarePos(PylosPlayer player, PylosSquare square){
+    private static PylosLocation getHalfZSquarePos(PylosPlayer player, PylosSquare square){
         for(PylosLocation location :square.getLocations()){
             if(location.isUsed() && location.getSphere().PLAYER_COLOR.equals(player.OTHER.PLAYER_COLOR)){
                 return location;
@@ -562,7 +547,6 @@ public abstract class Moves {
         return -1;
     }
 
-    //TODO DOCUMENTEREN
     private static int[] bepaalrichting(int posX) {
         int[] richting = new int[2];
         richting[0] = 2;       //bit zetten op 0/1
@@ -582,7 +566,7 @@ public abstract class Moves {
 
 
 
-    private static boolean[] realLocation(int [] richting ,PylosLocation pylosLocation, PylosBoard board){
+    private static boolean[] realLocation(int [] richting ,PylosLocation pylosLocation){
         boolean [] exist = new boolean[2];
         //exist default op false
         int positionx = pylosLocation.X + richting[0];
@@ -611,10 +595,7 @@ public abstract class Moves {
         return exist;
     }
 
-
-
-
-    public static int getLegeSpotposTriangle(PylosSquare square){
+    private static int getLegeSpotposTriangle(PylosSquare square){
         for(int i=0; i<4; i++) {
             if (!square.getLocations()[i].isUsed()) {
                 return i;
@@ -624,35 +605,18 @@ public abstract class Moves {
     }
 
 
-    public static boolean isFullZSquare(PylosPlayer player, PylosSquare square) {
+    private static boolean isFullZSquare(PylosSquare square) {
         List<Integer> legePositions = getLegeBalpos(square);
 
+        int legePosition1 = legePositions.remove(0);
+        int legePosition2 = legePositions.remove(0);
 
-
-        int legePosition1 = legePositions.remove(0);    //
-        int legePosition2 = legePositions.remove(0);    //
-
-        if(legePosition1+legePosition2==3) {
-            return true;
-        }
-
-        return false;
+        return legePosition1 + legePosition2 == 3;
 
     }
 
 
-    public static int getTegenStanderBalpos(PylosSquare square, PylosPlayer player){
-        for(int i=0; i<4; i++) {
-            if (square.getLocations()[i].isUsed()) {
-                if(square.getLocations()[i].getSphere().PLAYER_COLOR.equals(player.OTHER.PLAYER_COLOR))
-                    return i;
-            }
-        }
-        return -1;
-    }
-
-
-    public static List<Integer> getLegeBalpos(PylosSquare square){
+    private static List<Integer> getLegeBalpos(PylosSquare square){
         List<Integer> lijst = new ArrayList<>();
         for(int i=0; i<4; i++) {
             if (!square.getLocations()[i].isUsed()) {
@@ -662,7 +626,7 @@ public abstract class Moves {
         return lijst;
     }
 
-    public static PylosLocation getTegenovergesteldeLeeg(PylosSquare square, PylosLocation location){
+    private static PylosLocation getTegenovergesteldeLeeg(PylosSquare square, PylosLocation location){
         for(int i=0; i<4; i++){
             if(square.getLocations()[i].isUsable() && !square.getLocations()[i].equals(location)){
                 return square.getLocations()[i];
@@ -671,8 +635,6 @@ public abstract class Moves {
 
         return null;
     }
-
-
 
 
 }
