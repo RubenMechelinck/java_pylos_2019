@@ -15,17 +15,33 @@ import static be.kuleuven.pylos.player.student.StudentPlayerBestFit.lastPlacedSp
  */
 public abstract class Moves {
 
-    public static boolean makeCross(PylosGameIF game, PylosBoard board, PylosPlayer player, PylosSphere sphere){
-        return false;
+    /**
+     * Maakt een volledige Z, dit is een Z waarbij er 2 vrije plaatsen aanwezig zijn.
+     * @param sphere De sphere om te plaatsen.
+     * @param board Het bord van het spel.
+     * @param player De speler die de aan de beurt is.
+     * @return
+     */
+
+    public static boolean buildFullZ(PylosGameIF game, PylosBoard board, PylosPlayer player, PylosSphere sphere){
+        if(buildFullZ1(game,board,player,sphere)) {
+        return true;
+        }
+
+        return buildFullZ2(game, board, player, sphere);
     }
 
 
-    public static boolean buildFullZ(PylosGameIF game, PylosBoard board, PylosPlayer player, PylosSphere sphere){
+    /**
+     * Het eerste patroon van voor creatie van een Z, hierbij heeft het vierkant al een driehoek.
+     * @param sphere De sphere om te plaatsen.
+     * @param board Het bord van het spel.
+     * @param player De speler die de aan de beurt is.
+     * @return
+     */
+
+    public static boolean buildFullZ1(PylosGameIF game, PylosBoard board, PylosPlayer player, PylosSphere sphere){
         PylosSquare[] squares = board.getAllSquares(); //14 mogelijke squares in 4x4 bord
-
-
-        //2 situaties
-        //TODO SITUATIE 1
 
         //zoek driehoeken
         List<PylosSquare>  triangles = Arrays.stream(squares)
@@ -46,11 +62,60 @@ public abstract class Moves {
             }
         }
 
-        //TODO SITUATIE 2
-
         return false;
     }
 
+
+
+
+    /**
+     * Het tweede patroon van voor creatie van een Z, hierbij heeft het vierkant een diagonaal.
+     * @param sphere De sphere om te plaatsen.
+     * @param board Het bord van het spel.
+     * @param player De speler die de aan de beurt is.
+     * @return
+     */
+
+    public static boolean buildFullZ2(PylosGameIF game, PylosBoard board, PylosPlayer player, PylosSphere sphere){
+        //zoek squares met 2 eigen ballen en 1 tegenstander bal
+        List<PylosSquare> squares = Arrays.stream(board.getAllSquares())
+                .filter(e -> e.getInSquare(player) == 2 && e.getInSquare() == 2)
+                .collect(Collectors.toList());
+
+
+        //Kijken of eigen ballen schuin tov elkaar staan
+        for(PylosSquare square :squares){
+            if(isFullZSquare(player,square)){
+                List<Integer> lpos = getLegeBalpos(square); //Bepaalt lege plaatsen positie
+                List<PylosSquare> locations = new ArrayList<>();
+                locations.add(square);
+                List<PylosLocation> legeplaatsen = getLegePlaatsenInSquares(locations);     //Bepaalt de lege plaatsen
+
+                for(int i=0; i<legeplaatsen.size();i++) {
+                    if(legeplaatsen.get(i).isUsable()){ //kijken of usable is
+
+                        int [] richting = bepaalrichting((lpos.get((i+1)%2)));      //halen richting van andere lege plaats
+                        PylosLocation pylosLocation = getTegenovergesteldeLeeg(square,legeplaatsen.get(i));
+                        if(pylosLocation!=null){                //KAN ALS TEGENOVERGESTELDE ZWEEFT
+                        if (isCheckPlaceExistsPattern(board, richting, pylosLocation,player)) {
+                            game.moveSphere(sphere, legeplaatsen.get(i));
+                            lastPlacedSphere = sphere;
+                            return true;
+                            }
+                        }
+                    }
+                }
+
+
+            }
+        }
+
+        return false;
+
+    }
+
+
+    //Controlleerd of de plaats bestaat buiten het bord voor Pattern2.
     private static PylosLocation checkPlaceExists(PylosBoard board, int[] richting, PylosLocation pylosLocation){
         boolean[] exist = realLocation(richting,pylosLocation,board);       //Kijkt of bal bestaat
 
@@ -72,6 +137,32 @@ public abstract class Moves {
             }
         }
         return null;
+    }
+
+    //controlleert of de plaats bestaat voor Pattern1.
+    public static boolean isCheckPlaceExistsPattern(PylosBoard board, int[] richting, PylosLocation pylosLocation, PylosPlayer player){
+
+        boolean[] exist = realLocation(richting,pylosLocation,board);
+
+        if(exist[0]){
+            int pos2 = Integer.signum(richting[1]);
+            PylosLocation locationbal = board.getBoardLocation(pylosLocation.X+richting[0],pylosLocation.Y,pylosLocation.Z);
+            PylosLocation locationbal2 = board.getBoardLocation(pylosLocation.X+richting[0],pylosLocation.Y + pos2 ,pylosLocation.Z);
+            if(locationbal.isUsed()&&locationbal.getSphere().PLAYER_COLOR.equals(player.PLAYER_COLOR) && !locationbal2.isUsed()){
+                return true;
+            }
+        }
+
+        if(exist[1]){
+            int pos2 = Integer.signum(richting[0]);
+            PylosLocation locationbal = board.getBoardLocation(pylosLocation.X,pylosLocation.Y+richting[1],pylosLocation.Z);
+            PylosLocation locationbal2 = board.getBoardLocation(pylosLocation.X+ pos2,pylosLocation.Y + +richting[1],pylosLocation.Z);
+            if(locationbal.isUsed() && locationbal.getSphere().PLAYER_COLOR.equals(player.PLAYER_COLOR) && !locationbal2.isUsed()){
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -218,7 +309,32 @@ public abstract class Moves {
         return true;
     }
 
-    public static boolean buildHalfZ(PylosGameIF game, PylosBoard board, PylosPlayer player,  PylosSphere sphere) {
+
+    /**
+     * Maakt een halve Z, waarbij 1 van de vakjes geblokkeerd is door de tegenstander.
+     * @param sphere De sphere om te plaatsen.
+     * @param board Het bord van het spel.
+     * @param player De speler die de aan de beurt is.
+     * @return
+     */
+    public static boolean buildHalfZ(PylosGameIF game, PylosBoard board, PylosPlayer player,  PylosSphere sphere){
+        if(buildHalfZ1(game,board,player,sphere)){
+            return true;
+        }
+
+        return buildHalfZ2(game,board,player,sphere);
+    }
+
+
+    /**
+     * Maakt een halve Z, waarbij 1 van de vakjes geblokkeerd is door de tegenstander
+     * en vertrekt van een vierkant met 1 bal van tegenstander
+     * @param sphere De sphere om te plaatsen.
+     * @param board Het bord van het spel.
+     * @param player De speler die de aan de beurt is.
+     * @return
+     */
+    public static boolean buildHalfZ1(PylosGameIF game, PylosBoard board, PylosPlayer player,  PylosSphere sphere) {
         //zoek squares met 3 eigen ballen en 1 tegenstander bal
         List<PylosSquare> squares = Arrays.stream(board.getAllSquares())
                 .filter(e -> e.getInSquare(player) == 3 && e.getInSquare() == 4)
@@ -240,6 +356,51 @@ public abstract class Moves {
         return false;
     }
 
+
+
+    /**
+     * Maakt een halve Z, waarbij 1 van de vakjes geblokkeerd is door de tegenstander
+     * en vertrekt van een driehoek met 1 bal van tegenstander
+     * @param sphere De sphere om te plaatsen.
+     * @param board Het bord van het spel.
+     * @param player De speler die de aan de beurt is.
+     * @return
+     */
+    public static boolean buildHalfZ2(PylosGameIF game, PylosBoard board, PylosPlayer player,  PylosSphere sphere){
+
+
+        //zoek squares met 2 eigen ballen en 1 tegenstander bal
+        List<PylosSquare> squares = Arrays.stream(board.getAllSquares())
+                .filter(e -> e.getInSquare(player) == 2 && e.getInSquare() == 3)
+                .collect(Collectors.toList());
+
+
+        //Kijken of eigen ballen schuin tov elkaar staan
+        for(PylosSquare square :squares){
+            if(isHalfZSquare(player,square)){
+                int xpos = findXPos(player,square); //Bepaalt pos van X
+                PylosLocation legeplaats = getLegeLocation(square);
+
+                //lege plaats kan null zijn wanneer locatie onder plaats nog niet gebruikt is
+                if(legeplaats!=null) {
+                    int [] richting = bepaalrichting(xpos); //Bepaalt richting van andere bal
+                    PylosLocation pylosLocation = getHalfZSquarePos(player,square);         //Geeft locatie van X
+
+
+                    if(isCheckPlaceExistsPattern(board,richting,pylosLocation,player)){
+                        game.moveSphere(sphere, legeplaats);
+                        lastPlacedSphere = sphere;
+                        return true;
+                    }
+
+                }
+            }
+        }
+
+        return false;
+
+    }
+
     /**
      * Zoekt vierkant met 2 eigen ballen en 2 lege plaatsen, zet par:sphere op plek dichtst bij centrum
      * @param board
@@ -254,7 +415,7 @@ public abstract class Moves {
                 .collect(Collectors.toList());
 
         //lege plaatsen in halve squares
-        List<PylosLocation> freeLocations = getLegePlaatsenInSquare(squares);
+        List<PylosLocation> freeLocations = getLegePlaatsenInSquares(squares);
 
         if(freeLocations.isEmpty())
             return false;
@@ -269,7 +430,7 @@ public abstract class Moves {
         return true;
     }
 
-    private static List<PylosLocation> getLegePlaatsenInSquare(List<PylosSquare> squares){
+    private static List<PylosLocation> getLegePlaatsenInSquares(List<PylosSquare> squares){
         List<PylosLocation> freeLocations = new ArrayList<>();
         squares.forEach(e -> Arrays.stream(e.getLocations())
                 .forEach(q -> {if(q.isUsable()){freeLocations.add(q);}}));
@@ -290,7 +451,7 @@ public abstract class Moves {
                 .collect(Collectors.toList());
 
         //lege plaatsen in halve squares
-        List<PylosLocation> freeLocations = getLegePlaatsenInSquare(squares);
+        List<PylosLocation> freeLocations = getLegePlaatsenInSquares(squares);
 
         List<PylosLocation> bezetteLocations = new ArrayList<>();
         squares.forEach(e -> Arrays.stream(e.getLocations())
@@ -367,7 +528,7 @@ public abstract class Moves {
      */
     public static boolean isHalfZSquare(PylosPlayer player, PylosSquare square){
         if(!square.getLocations()[0].isUsed() || square.getLocations()[0].getSphere().PLAYER_COLOR.equals(player.OTHER.PLAYER_COLOR)) {           //is X of leeg
-            if (square.getLocations()[1].isUsed() && square.getLocations()[2].isUsed()) {                                                    //TODO EFFICIENTER
+            if (square.getLocations()[1].isUsed() && square.getLocations()[2].isUsed()) {
                 if (square.getLocations()[1].getSphere().PLAYER_COLOR.equals(square.getLocations()[2].getSphere().PLAYER_COLOR)) {
                     return true;
                 }
@@ -462,6 +623,54 @@ public abstract class Moves {
         return -1;
     }
 
+
+    public static boolean isFullZSquare(PylosPlayer player, PylosSquare square) {
+        List<Integer> legePositions = getLegeBalpos(square);
+
+
+
+        int legePosition1 = legePositions.remove(0);    //
+        int legePosition2 = legePositions.remove(0);    //
+
+        if(legePosition1+legePosition2==3) {
+            return true;
+        }
+
+        return false;
+
+    }
+
+
+    public static int getTegenStanderBalpos(PylosSquare square, PylosPlayer player){
+        for(int i=0; i<4; i++) {
+            if (square.getLocations()[i].isUsed()) {
+                if(square.getLocations()[i].getSphere().PLAYER_COLOR.equals(player.OTHER.PLAYER_COLOR))
+                    return i;
+            }
+        }
+        return -1;
+    }
+
+
+    public static List<Integer> getLegeBalpos(PylosSquare square){
+        List<Integer> lijst = new ArrayList<>();
+        for(int i=0; i<4; i++) {
+            if (!square.getLocations()[i].isUsed()) {
+                lijst.add(i);
+            }
+        }
+        return lijst;
+    }
+
+    public static PylosLocation getTegenovergesteldeLeeg(PylosSquare square, PylosLocation location){
+        for(int i=0; i<4; i++){
+            if(square.getLocations()[i].isUsable() && !square.getLocations()[i].equals(location)){
+                return square.getLocations()[i];
+            }
+        }
+
+        return null;
+    }
 
 
 
