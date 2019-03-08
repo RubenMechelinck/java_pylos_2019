@@ -11,7 +11,7 @@ import be.kuleuven.pylos.player.student.StudentPlayerBestFit;
 public class BattleMain {
 
 	public static void main(String[] args){
-		Battle.play(new StudentPlayerBestFit(), new PylosPlayerMiniMax(4), 500);
+		Battle.play(new StudentPlayerBestFit(), new PylosPlayerBestFit(), 500);
 	}
 
 }

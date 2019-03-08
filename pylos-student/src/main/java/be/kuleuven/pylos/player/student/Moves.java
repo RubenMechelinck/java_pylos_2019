@@ -1,3 +1,4 @@
+/*
 package be.kuleuven.pylos.player.student;
 
 import be.kuleuven.pylos.game.*;
@@ -8,20 +9,24 @@ import java.util.stream.Collectors;
 
 import static be.kuleuven.pylos.player.student.StudentPlayerBestFit.lastPlacedSphere;
 
+*/
 /**
  * Created by ruben on 23/02/19.
  * Elke methode returned true als de move is uitgevoerd,
  * false als de move niet uitvoerbaar is
- */
+ *//*
+
 public abstract class Moves {
 
-    /**
+    */
+/**
      * Maakt een volledige Z, dit is een Z waarbij er 2 vrije plaatsen aanwezig zijn.
      * @param sphere De sphere om te plaatsen.
      * @param board Het bord van het spel.
      * @param player De speler die de aan de beurt is.
      * @return
-     */
+     *//*
+
 
     public static boolean buildFullZ(PylosGameIF game, PylosBoard board, PylosPlayer player, PylosSphere sphere){
         if(buildFullZ1(game,board,player,sphere)) {
@@ -32,13 +37,15 @@ public abstract class Moves {
     }
 
 
-    /**
+    */
+/**
      * Het eerste patroon van voor creatie van een Z, hierbij heeft het vierkant al een driehoek.
      * @param sphere De sphere om te plaatsen.
      * @param board Het bord van het spel.
      * @param player De speler die de aan de beurt is.
      * @return
-     */
+     *//*
+
 
     private static boolean buildFullZ1(PylosGameIF game, PylosBoard board, PylosPlayer player, PylosSphere sphere){
         PylosSquare[] squares = board.getAllSquares(); //14 mogelijke squares in 4x4 bord
@@ -68,13 +75,15 @@ public abstract class Moves {
 
 
 
-    /**
+    */
+/**
      * Het tweede patroon van voor creatie van een Z, hierbij heeft het vierkant een diagonaal.
      * @param sphere De sphere om te plaatsen.
      * @param board Het bord van het spel.
      * @param player De speler die de aan de beurt is.
      * @return
-     */
+     *//*
+
 
     private static boolean buildFullZ2(PylosGameIF game, PylosBoard board, PylosPlayer player, PylosSphere sphere){
         //zoek squares met 2 eigen ballen en 1 tegenstander bal
@@ -162,13 +171,15 @@ public abstract class Moves {
         return false;
     }
 
-    /**
+    */
+/**
      * Blokeer een driehoek van de tegenstander door een eigen bal op de legen plek te leggen.
      * @param sphere
      * @param board
      * @param player De speler die de blokkade uitvoerd, niet de tegenstander!!
      * @return
-     */
+     *//*
+
     public static boolean blockTriangleOpponent(PylosGameIF game, PylosBoard board, PylosPlayer player, PylosSphere sphere){
         PylosSquare[] squares = board.getAllSquares(); //14 mogelijke squares in 4x4 bord
 
@@ -210,13 +221,15 @@ public abstract class Moves {
         return toLocation;
     }
 
-    /**
+    */
+/**
      * Zoek driehoek waarvan een viekant kan maken.
      * @param game
      * @param board
      * @param player De huidige speler aan de beurt.
      * @return
-     */
+     *//*
+
     public static boolean buildSquare(PylosGameIF game, PylosBoard board, PylosPlayer player){
         List<PylosSquare> squares = Arrays.stream(board.getAllSquares())
                 .filter(e -> e.getInSquare(player) == 3 && e.getInSquare(player.OTHER) == 0)
@@ -240,12 +253,14 @@ public abstract class Moves {
     }
 
 
-    /**
+    */
+/**
      * Plaats laagst neembare bal op de hoogst mogelijke plaats.
      * @param board
      * @param player De speler die aan zet is
      * @return
-     */
+     *//*
+
     public static boolean buildUpWithLowerSphere(PylosGameIF game, PylosBoard board, PylosPlayer player){
         //vrije plaatsen zoeken
         //14 mogelijke squares in 4x4 bord
@@ -307,13 +322,15 @@ public abstract class Moves {
     }
 
 
-    /**
+    */
+/**
      * Maakt een halve Z, waarbij 1 van de vakjes geblokkeerd is door de tegenstander.
      * @param sphere De sphere om te plaatsen.
      * @param board Het bord van het spel.
      * @param player De speler die de aan de beurt is.
      * @return
-     */
+     *//*
+
     public static boolean buildHalfZ(PylosGameIF game, PylosBoard board, PylosPlayer player,  PylosSphere sphere){
         if(buildHalfZ1(game,board,player,sphere)){
             return true;
@@ -323,14 +340,16 @@ public abstract class Moves {
     }
 
 
-    /**
+    */
+/**
      * Maakt een halve Z, waarbij 1 van de vakjes geblokkeerd is door de tegenstander
      * en vertrekt van een vierkant met 1 bal van tegenstander
      * @param sphere De sphere om te plaatsen.
      * @param board Het bord van het spel.
      * @param player De speler die de aan de beurt is.
      * @return
-     */
+     *//*
+
     private static boolean buildHalfZ1(PylosGameIF game, PylosBoard board, PylosPlayer player,  PylosSphere sphere) {
         //zoek squares met 3 eigen ballen en 1 tegenstander bal
         List<PylosSquare> squares = Arrays.stream(board.getAllSquares())
@@ -355,14 +374,16 @@ public abstract class Moves {
 
 
 
-    /**
+    */
+/**
      * Maakt een halve Z, waarbij 1 van de vakjes geblokkeerd is door de tegenstander
      * en vertrekt van een driehoek met 1 bal van tegenstander
      * @param sphere De sphere om te plaatsen.
      * @param board Het bord van het spel.
      * @param player De speler die de aan de beurt is.
      * @return
-     */
+     *//*
+
     private static boolean buildHalfZ2(PylosGameIF game, PylosBoard board, PylosPlayer player,  PylosSphere sphere){
 
 
@@ -398,12 +419,14 @@ public abstract class Moves {
 
     }
 
-    /**
+    */
+/**
      * Zoekt vierkant met 2 eigen ballen en 2 lege plaatsen, zet par:sphere op plek dichtst bij centrum
      * @param board
      * @param player
      * @return
-     */
+     *//*
+
     public static boolean createTriangle(PylosGameIF game, PylosBoard board, PylosPlayer player, PylosSphere sphere){
 
         //zoek squares met 2 eigen ballen en 2 legen plaatsen
@@ -434,12 +457,14 @@ public abstract class Moves {
         return freeLocations;
     }
 
-    /**
+    */
+/**
      * Connecteer 2 ballen aan elkaar, deze zoekt ballen waarbij er slechts 1 bal aanwezig is van de speler
      * @param board
      * @param player De huidige speler aan de beurt
      * @return
-     */
+     *//*
+
     public static boolean createConnection(PylosGameIF game, PylosBoard board, PylosPlayer player,PylosSphere sphere){
 
         //Zoek squares met 1 bal van player en nog lege plaatsen
@@ -478,12 +503,14 @@ public abstract class Moves {
         return false;
     }
 
-    /**
+    */
+/**
      * Zet een random bal (reserve of reeds op bord) naar random locatie
      * @param board
      * @param player
      * @return
-     */
+     *//*
+
     public static boolean randomMove(PylosGameIF game, PylosBoard board, PylosPlayer player){
         Random random = new Random();
 
@@ -638,3 +665,4 @@ public abstract class Moves {
 
 
 }
+*/

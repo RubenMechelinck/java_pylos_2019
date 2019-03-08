@@ -1,3 +1,4 @@
+/*
 package be.kuleuven.pylos.player.student;
 
 import be.kuleuven.pylos.game.PylosBoard;
@@ -12,16 +13,20 @@ import java.util.stream.Collectors;
 
 import static be.kuleuven.pylos.player.student.StudentPlayerBestFit.lastPlacedSphere;
 
+*/
 /**
  * Created by ruben on 2/03/19.
- */
-public class Removes {
+ *//*
 
-    /**
+public abstract class Removes {
+
+    */
+/**
      * Remove een bal uit het gemaakte vierkant, kies bal die verst van de rand ligt.
      * @param game
      * @param board
-     */
+     *//*
+
     public static void removeFirstSphere(PylosGameIF game, PylosBoard board, PylosPlayer player){
 
         //get alle squares waar laatste gelegde sphere tot behoort
@@ -65,3 +70,4 @@ public class Removes {
         return sphere.getLocation().getMaxInSquare(player.OTHER) == 3;
     }
 }
+*/
